@@ -69,8 +69,17 @@ type OengusAnswer = {
   answer: string | null;
 };
 
-type OengusSubmissions = OengusSubmission[];
+type OengusSubmissions = {
+  content: OengusSubmission[];
+  totalPages: number;
+  currentPage: number;
+  first: boolean;
+  last: boolean;
+  empty: boolean;
+};
+
 type OengusSubmission = {
+  id: number;
   games: OengusGame[];
   user: OengusUser;
 };

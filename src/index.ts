@@ -9,6 +9,7 @@ const getOengusMd = async (marathonId: string, token: string): Promise<OengusMar
     },
   };
   const res = await fetch(`https://oengus.io/api/v1/marathons/${marathonId}`, options);
+  console.log(`status=${res.status}`);
   const json = (await res.json()) as OengusMarathon;
   return json;
 };
@@ -21,20 +22,33 @@ const getOengusAnswers = async (marathonId: string, token: string): Promise<Oeng
     },
   };
   const res = await fetch(`https://oengus.io/api/v1/marathons/${marathonId}/submissions/answers`, options);
+  console.log(`status=${res.status}`);
   const json = (await res.json()) as OengusAnswers;
   return json;
 };
 
-const getOengusSubmissions = async (marathonId: string, token: string): Promise<OengusSubmissions> => {
+const getOengusSubmissions = async (marathonId: string, token: string): Promise<OengusSubmission[]> => {
   const options = {
     method: 'GET',
     headers: {
       authorization: `Bearer ${token}`,
     },
   };
-  const res = await fetch(`https://oengus.io/api/v1/marathons/${marathonId}/submissions`, options);
-  const json = (await res.json()) as OengusSubmissions;
-  return json;
+  const list: OengusSubmission[] = [];
+  let iscontinue = true;
+  let pageNum = 1;
+  let pageMax = 0;
+  while (iscontinue) {
+    console.log(`submission page=${pageNum}/${pageMax}`);
+    const res = await fetch(`https://oengus.io/api/v1/marathons/${marathonId}/submissions?page=${pageNum}`, options);
+    console.log(`status=${res.status}`);
+    const json = (await res.json()) as OengusSubmissions;
+    list.push(...json.content);
+    if (json.last) iscontinue = false;
+    pageNum++;
+    pageMax = json.totalPages;
+  }
+  return list;
 };
 
 const getOengusmSelection = async (marathonId: string, token: string): Promise<OengusSelection> => {
@@ -45,6 +59,7 @@ const getOengusmSelection = async (marathonId: string, token: string): Promise<O
     },
   };
   const res = await fetch(`https://oengus.io/api/v1/marathons/${marathonId}/selections?status=`, options);
+  console.log(`status=${res.status}`);
   const json = (await res.json()) as OengusSelection;
   return json;
 };
@@ -59,6 +74,7 @@ const getOengusmAvailabilities = async (marathonId: string, userId: number, toke
     },
   };
   const res = await fetch(`https://oengus.io/api/v1/marathons/${marathonId}/submissions/availabilities/${userId}`, options);
+  console.log(`status=${res.status}`);
   const json = (await res.json()) as OengusAvailabilities;
   // 普通はkeyが1個(username)だけなので、それ以外の場合はリトライする
   if (Object.keys(json).length >= 2) {
@@ -101,8 +117,9 @@ const saveTxt = (filepath: string, json: any) => {
 const sleep = (msec: number) => new Promise((resolve) => setTimeout(resolve, msec));
 
 const start = async () => {
-  const id = '★marathon id★';
-  const token = '★Oengus トークン★';
+  const id = 'rtaijw2022';
+  const token =
+    'eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJwYXN0YTA0Iiwicm9sZSI6WyJST0xFX1VTRVIiXSwiaWQiOjE3NSwiZXhwIjoxNjY2NzkzOTUxLCJpYXQiOjE2NjYxODkxNTEsImVuYWJsZWQiOnRydWUsImp0aSI6IjE3NSJ9.1tZR6xDS6L2ZTGM7xVcorav2ScNaHLkBnwqA7sHZ1gfVeHJ3fXFIx3Wb_G5wmvHUX7Y5MF46V9pfJW60-VkkIg';
 
   // md
   console.log(`イベント情報を取得: ${id}`);
